@@ -1,3 +1,4 @@
+import argparse
 import ast
 import sys
 
@@ -92,8 +93,16 @@ class CommandInjectionVisitor(BaseVisitor):
 class VulnerabilityScanner:
     """Runs all registered detectors over a single file's AST."""
 
-    def __init__(self):
-        self.detector_classes = [SQLInjectionVisitor, CommandInjectionVisitor]
+    AVAILABLE_CHECKS = {
+        "sqli": SQLInjectionVisitor,
+        "cmdi": CommandInjectionVisitor,
+    }
+
+    def __init__(self, checks=None):
+        if checks is None:
+            self.detector_classes = list(self.AVAILABLE_CHECKS.values())
+        else:
+            self.detector_classes = [self.AVAILABLE_CHECKS[c] for c in checks]
 
     def scan(self, filepath):
         with open(filepath, "r") as f:
@@ -132,10 +141,32 @@ class VulnerabilityScanner:
             print(f"    {r['snippet']}\n")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Static vulnerability scanner for Python code (AST-based)."
+    )
+    parser.add_argument(
+        "--file",
+        required=True,
+        help="Path to the Python file to scan",
+    )
+    parser.add_argument(
+        "--checks",
+        default="sqli,cmdi",
+        help="Comma-separated list of checks to run (default: sqli,cmdi)",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python scanner.py <filepath>")
+    args = parse_args()
+    checks = [c.strip() for c in args.checks.split(",")]
+
+    invalid = [c for c in checks if c not in VulnerabilityScanner.AVAILABLE_CHECKS]
+    if invalid:
+        print(f"Unknown check(s): {', '.join(invalid)}")
+        print(f"Available checks: {', '.join(VulnerabilityScanner.AVAILABLE_CHECKS.keys())}")
         sys.exit(1)
 
-    scanner = VulnerabilityScanner()
-    scanner.report(sys.argv[1])
+    scanner = VulnerabilityScanner(checks=checks)
+    scanner.report(args.file)
