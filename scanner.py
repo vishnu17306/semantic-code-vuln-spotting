@@ -105,11 +105,23 @@ class VulnerabilityScanner:
             self.detector_classes = [self.AVAILABLE_CHECKS[c] for c in checks]
 
     def scan(self, filepath):
-        with open(filepath, "r") as f:
-            source = f.read()
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                source = f.read()
+        except UnicodeDecodeError:
+            print(f"Skipping {filepath}: invalid encoding detected.")
+            return []
+        except IOError as e:
+            print(f"Skipping {filepath}: could not read file ({e}).")
+            return []
+
+        try:
+            tree = ast.parse(source)
+        except SyntaxError as e:
+            print(f"Skipping {filepath}: syntax error ({e}).")
+            return []
 
         source_lines = source.splitlines()
-        tree = ast.parse(source)
         results = []
 
         for detector_cls in self.detector_classes:
