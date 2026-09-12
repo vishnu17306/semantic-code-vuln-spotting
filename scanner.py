@@ -2,14 +2,21 @@ import ast
 import sys
 
 
+SEVERITY = {
+    "SQL Injection": "High",
+    "Command Injection": "High",
+}
+
+
 class BaseVisitor(ast.NodeVisitor):
     """Shared taint-tracking logic used by all detectors."""
 
     vulnerability_type = "unknown"
 
-    def __init__(self):
+    def __init__(self, source_lines):
         self.findings = []
         self.tainted_vars = set()
+        self.source_lines = source_lines
 
     def visit_FunctionDef(self, node):
         outer_tainted = self.tainted_vars
@@ -30,6 +37,18 @@ class BaseVisitor(ast.NodeVisitor):
     def _is_tainted_name(self, node):
         return isinstance(node, ast.Name) and node.id in self.tainted_vars
 
+    def _record_finding(self, node):
+        start = node.lineno
+        end = getattr(node, "end_lineno", start)
+        snippet_lines = self.source_lines[start - 1:end]
+        snippet = " ".join(line.strip() for line in snippet_lines)
+        self.findings.append({
+            "type": self.vulnerability_type,
+            "line": start,
+            "snippet": snippet,
+            "severity": SEVERITY.get(self.vulnerability_type, "Medium"),
+        })
+
 
 class SQLInjectionVisitor(BaseVisitor):
     vulnerability_type = "SQL Injection"
@@ -39,7 +58,7 @@ class SQLInjectionVisitor(BaseVisitor):
             if node.args:
                 arg = node.args[0]
                 if self._is_unsafe_string_build(arg) or self._is_tainted_name(arg):
-                    self.findings.append(node.lineno)
+                    self._record_finding(node)
         self.generic_visit(node)
 
 
@@ -59,7 +78,7 @@ class CommandInjectionVisitor(BaseVisitor):
             if node.args:
                 arg = node.args[0]
                 if self._is_unsafe_string_build(arg) or self._is_tainted_name(arg):
-                    self.findings.append(node.lineno)
+                    self._record_finding(node)
         self.generic_visit(node)
 
     def _is_unsafe_call(self, node):
@@ -80,19 +99,25 @@ class VulnerabilityScanner:
         with open(filepath, "r") as f:
             source = f.read()
 
+        source_lines = source.splitlines()
         tree = ast.parse(source)
         results = []
 
         for detector_cls in self.detector_classes:
-            visitor = detector_cls()
+            visitor = detector_cls(source_lines)
             visitor.visit(tree)
-            for line in sorted(set(visitor.findings)):
-                results.append({
-                    "type": visitor.vulnerability_type,
-                    "line": line,
-                })
+            results.extend(visitor.findings)
 
-        return results
+        # Dedupe in case multiple detectors flag the same line
+        seen = set()
+        deduped = []
+        for r in sorted(results, key=lambda x: x["line"]):
+            key = (r["line"], r["type"])
+            if key not in seen:
+                seen.add(key)
+                deduped.append(r)
+
+        return deduped
 
     def report(self, filepath):
         results = self.scan(filepath)
@@ -101,9 +126,10 @@ class VulnerabilityScanner:
             print(f"No issues found in {filepath}")
             return
 
-        print(f"Findings in {filepath}:")
-        for r in sorted(results, key=lambda x: x["line"]):
-            print(f"  - line {r['line']}: {r['type']}")
+        print(f"Findings in {filepath}:\n")
+        for r in results:
+            print(f"  [{r['severity']}] {r['type']} — line {r['line']}")
+            print(f"    {r['snippet']}\n")
 
 
 if __name__ == "__main__":
