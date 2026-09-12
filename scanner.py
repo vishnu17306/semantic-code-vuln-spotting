@@ -1,16 +1,18 @@
 import argparse
 import ast
+import re
 import sys
 
 
 SEVERITY = {
     "SQL Injection": "High",
     "Command Injection": "High",
+    "Hardcoded Secret": "High",
 }
 
 
 class BaseVisitor(ast.NodeVisitor):
-    """Shared taint-tracking logic used by all detectors."""
+    """Shared taint-tracking logic used by AST-based detectors."""
 
     vulnerability_type = "unknown"
 
@@ -90,12 +92,42 @@ class CommandInjectionVisitor(BaseVisitor):
         return False
 
 
+class SecretDetector:
+    """Regex-based detector for hardcoded credentials. Not AST-based."""
+
+    vulnerability_type = "Hardcoded Secret"
+
+    PATTERNS = {
+        "AWS Access Key": r"AKIA[A-Z0-9]{16}",
+        "Stripe Live Key": r"sk_live_[a-zA-Z0-9]{24,}",
+        "Generic API Key Assignment": r"(?i)(api[_-]?key|secret[_-]?key)\s*=\s*[\"'][a-zA-Z0-9_\-]{16,}[\"']",
+        "Private Key Header": r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----",
+    }
+
+    def __init__(self, source_lines):
+        self.source_lines = source_lines
+        self.findings = []
+
+    def scan(self):
+        for i, line in enumerate(self.source_lines, start=1):
+            for label, pattern in self.PATTERNS.items():
+                if re.search(pattern, line):
+                    self.findings.append({
+                        "type": self.vulnerability_type,
+                        "line": i,
+                        "snippet": line.strip(),
+                        "severity": "High",
+                    })
+        return self.findings
+
+
 class VulnerabilityScanner:
-    """Runs all registered detectors over a single file's AST."""
+    """Runs all registered detectors over a single file."""
 
     AVAILABLE_CHECKS = {
         "sqli": SQLInjectionVisitor,
         "cmdi": CommandInjectionVisitor,
+        "secrets": SecretDetector,
     }
 
     def __init__(self, checks=None):
@@ -115,21 +147,28 @@ class VulnerabilityScanner:
             print(f"Skipping {filepath}: could not read file ({e}).")
             return []
 
-        try:
-            tree = ast.parse(source)
-        except SyntaxError as e:
-            print(f"Skipping {filepath}: syntax error ({e}).")
-            return []
-
         source_lines = source.splitlines()
+
+        needs_ast = any(cls is not SecretDetector for cls in self.detector_classes)
+        tree = None
+        if needs_ast:
+            try:
+                tree = ast.parse(source)
+            except SyntaxError as e:
+                print(f"Skipping {filepath}: syntax error ({e}).")
+                return []
+
         results = []
-
         for detector_cls in self.detector_classes:
-            visitor = detector_cls(source_lines)
-            visitor.visit(tree)
-            results.extend(visitor.findings)
+            if detector_cls is SecretDetector:
+                detector = detector_cls(source_lines)
+                results.extend(detector.scan())
+            else:
+                visitor = detector_cls(source_lines)
+                visitor.visit(tree)
+                results.extend(visitor.findings)
 
-        # Dedupe in case multiple detectors flag the same line
+        # Dedupe in case multiple detectors flag the same line/type
         seen = set()
         deduped = []
         for r in sorted(results, key=lambda x: x["line"]):
@@ -164,8 +203,8 @@ def parse_args():
     )
     parser.add_argument(
         "--checks",
-        default="sqli,cmdi",
-        help="Comma-separated list of checks to run (default: sqli,cmdi)",
+        default="sqli,cmdi,secrets",
+        help="Comma-separated list of checks to run (default: sqli,cmdi,secrets)",
     )
     return parser.parse_args()
 
@@ -182,3 +221,60 @@ if __name__ == "__main__":
 
     scanner = VulnerabilityScanner(checks=checks)
     scanner.report(args.file)
+import json
+
+
+SARIF_RULE_IDS = {
+    "SQL Injection": "sql-injection",
+    "Command Injection": "command-injection",
+    "Hardcoded Secret": "hardcoded-secret",
+}
+
+SARIF_SEVERITY_LEVELS = {
+    "High": "error",
+    "Medium": "warning",
+    "Low": "note",
+}
+
+
+def to_sarif(filepath, results):
+    """Convert scanner findings into a SARIF 2.1.0 JSON structure."""
+    sarif_results = []
+    for r in results:
+        sarif_results.append({
+            "ruleId": SARIF_RULE_IDS.get(r["type"], "unknown"),
+            "level": SARIF_SEVERITY_LEVELS.get(r["severity"], "warning"),
+            "message": {
+                "text": f"{r['type']} detected: {r['snippet']}"
+            },
+            "locations": [
+                {
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": filepath},
+                        "region": {"startLine": r["line"]},
+                    }
+                }
+            ],
+        })
+
+    sarif_doc = {
+        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "semantic-code-vuln-spotting",
+                        "informationUri": "https://github.com/vishnu17306/semantic-code-vuln-spotting",
+                        "version": "0.1.0",
+                        "rules": [
+                            {"id": rule_id, "name": name}
+                            for name, rule_id in SARIF_RULE_IDS.items()
+                        ],
+                    }
+                },
+                "results": sarif_results,
+            }
+        ],
+    }
+    return sarif_doc

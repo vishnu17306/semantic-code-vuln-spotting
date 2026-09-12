@@ -101,4 +101,34 @@ os.system("ping " + hostname)
     sqli_only = run_scan(tmp_path, code, checks=["sqli"])
     assert len(sqli_only) == 1
     assert sqli_only[0]["type"] == "SQL Injection"
-    
+
+def test_secrets_aws_key_detected(tmp_path):
+    code = 'AWS_KEY = "AKIAABCDEFGHIJKLMNOP"'
+    results = run_scan(tmp_path, code, checks=["secrets"])
+    assert len(results) == 1
+    assert results[0]["type"] == "Hardcoded Secret"
+
+
+def test_secrets_stripe_key_detected(tmp_path):
+    code = 'STRIPE_KEY = "sk_live_FAKEFAKEFAKEFAKEFAKEFAKE"'
+    results = run_scan(tmp_path, code, checks=["secrets"])
+    assert len(results) == 1
+
+def test_secrets_private_key_header_detected(tmp_path):
+    code = "-----BEGIN RSA PRIVATE KEY-----"
+    results = run_scan(tmp_path, code, checks=["secrets"])
+    assert len(results) == 1
+
+
+def test_secrets_env_var_lookup_not_flagged(tmp_path):
+    code = 'AWS_KEY = os.environ.get("AWS_ACCESS_KEY_ID")'
+    results = run_scan(tmp_path, code, checks=["secrets"])
+    assert len(results) == 0
+
+
+def test_secrets_check_runs_without_ast_parsing(tmp_path):
+    # Even syntactically broken code should still get scanned for secrets,
+    # since SecretDetector doesn't need a valid AST
+    code = 'AWS_KEY = "AKIAABCDEFGHIJKLMNOP"\ndef broken(:'
+    results = run_scan(tmp_path, code, checks=["secrets"])
+    assert len(results) == 1    
