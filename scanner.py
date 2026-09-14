@@ -28,11 +28,18 @@ class BaseVisitor(ast.NodeVisitor):
     """Shared taint-tracking logic used by AST-based detectors."""
 
     vulnerability_type = "unknown"
+    requires_ast = True
 
     def __init__(self, source_lines):
         self.findings = []
         self.tainted_vars = set()
         self.source_lines = source_lines
+
+    @classmethod
+    def run(cls, source, source_lines, tree):
+        visitor = cls(source_lines)
+        visitor.visit(tree)
+        return visitor.findings
 
     def visit_FunctionDef(self, node):
         outer_tainted = self.tainted_vars
@@ -109,6 +116,7 @@ class SecretDetector:
     """Regex-based detector for hardcoded credentials. Not AST-based."""
 
     vulnerability_type = "Hardcoded Secret"
+    requires_ast = False
 
     PATTERNS = {
         "AWS Access Key": r"AKIA[A-Z0-9]{16}",
@@ -120,6 +128,11 @@ class SecretDetector:
     def __init__(self, source_lines):
         self.source_lines = source_lines
         self.findings = []
+
+    @classmethod
+    def run(cls, source, source_lines, tree):
+        detector = cls(source_lines)
+        return detector.scan()
 
     def scan(self):
         for i, line in enumerate(self.source_lines, start=1):
@@ -175,7 +188,14 @@ def to_sarif(filepath, results):
 
 
 class VulnerabilityScanner:
-    """Runs all registered detectors over a single file."""
+    """Runs all registered detectors over a single file.
+
+    Every detector class must define:
+      - requires_ast: bool
+      - run(cls, source, source_lines, tree) -> list[dict]
+    This uniform interface is what lets rule-based, regex-based,
+    and (later) ML-based detectors plug in interchangeably.
+    """
 
     AVAILABLE_CHECKS = {
         "sqli": SQLInjectionVisitor,
@@ -202,7 +222,7 @@ class VulnerabilityScanner:
 
         source_lines = source.splitlines()
 
-        needs_ast = any(cls is not SecretDetector for cls in self.detector_classes)
+        needs_ast = any(cls.requires_ast for cls in self.detector_classes)
         tree = None
         if needs_ast:
             try:
@@ -213,13 +233,7 @@ class VulnerabilityScanner:
 
         results = []
         for detector_cls in self.detector_classes:
-            if detector_cls is SecretDetector:
-                detector = detector_cls(source_lines)
-                results.extend(detector.scan())
-            else:
-                visitor = detector_cls(source_lines)
-                visitor.visit(tree)
-                results.extend(visitor.findings)
+            results.extend(detector_cls.run(source, source_lines, tree))
 
         seen = set()
         deduped = []
