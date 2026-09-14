@@ -1,5 +1,6 @@
 import argparse
 import ast
+import json
 import re
 import sys
 
@@ -8,6 +9,18 @@ SEVERITY = {
     "SQL Injection": "High",
     "Command Injection": "High",
     "Hardcoded Secret": "High",
+}
+
+SARIF_RULE_IDS = {
+    "SQL Injection": "sql-injection",
+    "Command Injection": "command-injection",
+    "Hardcoded Secret": "hardcoded-secret",
+}
+
+SARIF_SEVERITY_LEVELS = {
+    "High": "error",
+    "Medium": "warning",
+    "Low": "note",
 }
 
 
@@ -121,6 +134,46 @@ class SecretDetector:
         return self.findings
 
 
+def to_sarif(filepath, results):
+    """Convert scanner findings into a SARIF 2.1.0 JSON structure."""
+    sarif_results = []
+    for r in results:
+        sarif_results.append({
+            "ruleId": SARIF_RULE_IDS.get(r["type"], "unknown"),
+            "level": SARIF_SEVERITY_LEVELS.get(r["severity"], "warning"),
+            "message": {"text": f"{r['type']} detected: {r['snippet']}"},
+            "locations": [
+                {
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": filepath},
+                        "region": {"startLine": r["line"]},
+                    }
+                }
+            ],
+        })
+
+    return {
+        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "semantic-code-vuln-spotting",
+                        "informationUri": "https://github.com/vishnu17306/semantic-code-vuln-spotting",
+                        "version": "0.1.0",
+                        "rules": [
+                            {"id": rule_id, "name": name}
+                            for name, rule_id in SARIF_RULE_IDS.items()
+                        ],
+                    }
+                },
+                "results": sarif_results,
+            }
+        ],
+    }
+
+
 class VulnerabilityScanner:
     """Runs all registered detectors over a single file."""
 
@@ -168,7 +221,6 @@ class VulnerabilityScanner:
                 visitor.visit(tree)
                 results.extend(visitor.findings)
 
-        # Dedupe in case multiple detectors flag the same line/type
         seen = set()
         deduped = []
         for r in sorted(results, key=lambda x: x["line"]):
@@ -179,8 +231,12 @@ class VulnerabilityScanner:
 
         return deduped
 
-    def report(self, filepath):
+    def report(self, filepath, output_format="text"):
         results = self.scan(filepath)
+
+        if output_format == "sarif":
+            print(json.dumps(to_sarif(filepath, results), indent=2))
+            return
 
         if not results:
             print(f"No issues found in {filepath}")
@@ -206,6 +262,12 @@ def parse_args():
         default="sqli,cmdi,secrets",
         help="Comma-separated list of checks to run (default: sqli,cmdi,secrets)",
     )
+    parser.add_argument(
+        "--format",
+        choices=["text", "sarif"],
+        default="text",
+        help="Output format (default: text)",
+    )
     return parser.parse_args()
 
 
@@ -220,61 +282,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     scanner = VulnerabilityScanner(checks=checks)
-    scanner.report(args.file)
-import json
-
-
-SARIF_RULE_IDS = {
-    "SQL Injection": "sql-injection",
-    "Command Injection": "command-injection",
-    "Hardcoded Secret": "hardcoded-secret",
-}
-
-SARIF_SEVERITY_LEVELS = {
-    "High": "error",
-    "Medium": "warning",
-    "Low": "note",
-}
-
-
-def to_sarif(filepath, results):
-    """Convert scanner findings into a SARIF 2.1.0 JSON structure."""
-    sarif_results = []
-    for r in results:
-        sarif_results.append({
-            "ruleId": SARIF_RULE_IDS.get(r["type"], "unknown"),
-            "level": SARIF_SEVERITY_LEVELS.get(r["severity"], "warning"),
-            "message": {
-                "text": f"{r['type']} detected: {r['snippet']}"
-            },
-            "locations": [
-                {
-                    "physicalLocation": {
-                        "artifactLocation": {"uri": filepath},
-                        "region": {"startLine": r["line"]},
-                    }
-                }
-            ],
-        })
-
-    sarif_doc = {
-        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
-        "version": "2.1.0",
-        "runs": [
-            {
-                "tool": {
-                    "driver": {
-                        "name": "semantic-code-vuln-spotting",
-                        "informationUri": "https://github.com/vishnu17306/semantic-code-vuln-spotting",
-                        "version": "0.1.0",
-                        "rules": [
-                            {"id": rule_id, "name": name}
-                            for name, rule_id in SARIF_RULE_IDS.items()
-                        ],
-                    }
-                },
-                "results": sarif_results,
-            }
-        ],
-    }
-    return sarif_doc
+    scanner.report(args.file, output_format=args.format)

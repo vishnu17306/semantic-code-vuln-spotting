@@ -132,3 +132,35 @@ def test_secrets_check_runs_without_ast_parsing(tmp_path):
     code = 'AWS_KEY = "AKIAABCDEFGHIJKLMNOP"\ndef broken(:'
     results = run_scan(tmp_path, code, checks=["secrets"])
     assert len(results) == 1    
+
+import json
+from scanner import to_sarif
+
+
+def test_sarif_output_has_valid_structure(tmp_path):
+    code = 'cursor.execute("SELECT * FROM users WHERE id = " + user_id)'
+    f = tmp_path / "sample.py"
+    f.write_text(code)
+
+    scanner = VulnerabilityScanner(checks=["sqli"])
+    results = scanner.scan(str(f))
+    sarif_doc = to_sarif(str(f), results)
+
+    assert sarif_doc["version"] == "2.1.0"
+    assert "runs" in sarif_doc
+    assert len(sarif_doc["runs"][0]["results"]) == 1
+    assert sarif_doc["runs"][0]["results"][0]["ruleId"] == "sql-injection"
+    assert sarif_doc["runs"][0]["results"][0]["level"] == "error"
+
+
+def test_sarif_output_is_valid_json(tmp_path):
+    code = 'cursor.execute("SELECT * FROM users WHERE id = " + user_id)'
+    f = tmp_path / "sample.py"
+    f.write_text(code)
+
+    scanner = VulnerabilityScanner(checks=["sqli"])
+    results = scanner.scan(str(f))
+    sarif_doc = to_sarif(str(f), results)
+
+    # Should not raise
+    json.dumps(sarif_doc)
