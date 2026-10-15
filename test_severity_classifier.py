@@ -30,3 +30,8 @@ def test_plain_comment_is_not_an_issue():
 
 def test_every_issue_gets_a_recommendation():
     assert classify(rec("TODO: add tests"))["recommendation"]
+
+def test_class_name_is_not_a_security_issue():
+    result = classify(rec("Refactor into VulnerabilityScanner class"))
+    assert result["severity"] == "low"
+    assert result["category"] == "cleanup"

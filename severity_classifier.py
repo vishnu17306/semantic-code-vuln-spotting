@@ -7,7 +7,7 @@ SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 
 # (regex, severity, category), checked against the comment text
 KEYWORD_RULES = [
-    (r"\b(sql injection|injection|vulnerab\w*|exploit\w*|attacker\w*|xss|csrf|insecure|security)\b",
+    (r"\b(sql injection|injection|vulnerab(?:le|ility|ilities)|exploit\w*|attacker\w*|xss|csrf|insecure|security)\b",
      "critical", "security"),
     (r"\b(data loss|corrupt\w*)\b", "critical", "data_loss"),
     (r"\b(password\w*|credential\w*|secret\w*|api key)\b", "high", "security"),
