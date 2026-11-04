@@ -9,12 +9,14 @@ SEVERITY = {
     "SQL Injection": "High",
     "Command Injection": "High",
     "Hardcoded Secret": "High",
+    "Path Traversal": "High",
 }
 
 SARIF_RULE_IDS = {
     "SQL Injection": "sql-injection",
     "Command Injection": "command-injection",
     "Hardcoded Secret": "hardcoded-secret",
+    "Path Traversal": "path-traversal",
 }
 
 SARIF_SEVERITY_LEVELS = {
@@ -112,6 +114,47 @@ class CommandInjectionVisitor(BaseVisitor):
         return False
 
 
+class PathTraversalVisitor(BaseVisitor):
+    """Taint originates from the function's OWN parameters, not from
+    string-building — path-like arguments in a handler are attacker-
+    controlled by default. Known limitation: no sanitization awareness,
+    so a validated/normalized path still gets flagged (false positive)."""
+
+    vulnerability_type = "Path Traversal"
+
+    UNSAFE_FUNCS = {
+        "os.path.join",
+        "os.path.realpath",
+        "open",
+        "send_file",
+        "os.listdir",
+        "tarfile.open",
+    }
+
+    def visit_FunctionDef(self, node):
+        outer_tainted = self.tainted_vars
+        self.tainted_vars = {arg.arg for arg in node.args.args}
+        self.generic_visit(node)
+        self.tainted_vars = outer_tainted
+
+    def visit_Call(self, node):
+        func_name = self._get_dotted_name(node.func)
+        if func_name in self.UNSAFE_FUNCS:
+            for arg in node.args:
+                if self._is_tainted_name(arg) or self._is_unsafe_string_build(arg):
+                    self._record_finding(node)
+                    break
+        self.generic_visit(node)
+
+    def _get_dotted_name(self, node):
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            base = self._get_dotted_name(node.value)
+            return f"{base}.{node.attr}" if base else None
+        return None
+
+
 class SecretDetector:
     """Regex-based detector for hardcoded credentials. Not AST-based."""
 
@@ -201,6 +244,7 @@ class VulnerabilityScanner:
         "sqli": SQLInjectionVisitor,
         "cmdi": CommandInjectionVisitor,
         "secrets": SecretDetector,
+        "pathtraversal": PathTraversalVisitor,
     }
 
     def __init__(self, checks=None):
@@ -273,8 +317,8 @@ def parse_args():
     )
     parser.add_argument(
         "--checks",
-        default="sqli,cmdi,secrets",
-        help="Comma-separated list of checks to run (default: sqli,cmdi,secrets)",
+        default="sqli,cmdi,secrets,pathtraversal",
+        help="Comma-separated list of checks to run (default: sqli,cmdi,secrets,pathtraversal)",
     )
     parser.add_argument(
         "--format",

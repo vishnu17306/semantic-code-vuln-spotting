@@ -20,42 +20,93 @@ class SQLInjectionVisitor(ast.NodeVisitor):
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     self.tainted_vars.add(target.id)
+
         self.generic_visit(node)
 
     def visit_Call(self, node):
         if isinstance(node.func, ast.Attribute) and node.func.attr == "execute":
             if node.args:
                 arg = node.args[0]
+
                 if self._is_unsafe_string_build(arg) or self._is_tainted_name(arg):
                     self.findings.append(node.lineno)
+
         self.generic_visit(node)
 
     def _is_unsafe_string_build(self, node):
         if isinstance(node, ast.BinOp):
             return True
+
         if isinstance(node, ast.JoinedStr):
             return True
+
         return False
 
     def _is_tainted_name(self, node):
         return isinstance(node, ast.Name) and node.id in self.tainted_vars
 
 
+# -------------------------------
+# XSS DETECTOR
+# -------------------------------
+
+class XSSVisitor(ast.NodeVisitor):
+    def __init__(self):
+        self.findings = []
+
+    def visit_Call(self, node):
+        # Detect potentially dangerous HTML rendering functions
+        if isinstance(node.func, ast.Name):
+            if node.func.id in ["render_template_string", "Markup"]:
+                self.findings.append(node.lineno)
+
+        self.generic_visit(node)
+
+
+# -------------------------------
+# FILE ANALYZER
+# -------------------------------
+
 def analyze_file(filepath):
     with open(filepath, "r") as f:
         source = f.read()
 
     tree = ast.parse(source)
-    visitor = SQLInjectionVisitor()
-    visitor.visit(tree)
 
-    if visitor.findings:
+    # ---------------------------
+    # SQL Injection Test
+    # ---------------------------
+
+    sql_visitor = SQLInjectionVisitor()
+    sql_visitor.visit(tree)
+
+    if sql_visitor.findings:
         print(f"Potential SQL injection found in {filepath}:")
-        for line in sorted(set(visitor.findings)):
-            print(f"  - line {line}")
-    else:
-        print(f"No issues found in {filepath}")
 
+        for line in sorted(set(sql_visitor.findings)):
+            print(f" - line {line}")
+    else:
+        print(f"No SQL injection issues found in {filepath}")
+
+    # ---------------------------
+    # XSS Test
+    # ---------------------------
+
+    xss_visitor = XSSVisitor()
+    xss_visitor.visit(tree)
+
+    if xss_visitor.findings:
+        print(f"Potential XSS found in {filepath}:")
+
+        for line in sorted(set(xss_visitor.findings)):
+            print(f" - line {line}")
+    else:
+        print(f"No XSS issues found in {filepath}")
+
+
+# -------------------------------
+# MAIN
+# -------------------------------
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

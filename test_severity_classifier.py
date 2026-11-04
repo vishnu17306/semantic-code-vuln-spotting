@@ -35,3 +35,12 @@ def test_class_name_is_not_a_security_issue():
     result = classify(rec("Refactor into VulnerabilityScanner class"))
     assert result["severity"] == "low"
     assert result["category"] == "cleanup"
+
+def test_marker_in_middle_of_text_is_found():
+    result = classify(rec("GH#54105 something is confusing TODO: rework this part"))
+    assert result["severity"] == "low"
+    assert result["category"] == "incomplete"
+
+
+def test_lowercase_bug_word_in_prose_is_not_a_marker():
+    assert classify(rec("this branch has no bug in it")) is None

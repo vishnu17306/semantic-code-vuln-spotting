@@ -53,7 +53,9 @@ def classify(record):
         if re.search(pattern, text, re.IGNORECASE):
             candidates.append((severity, category))
 
-    marker = re.match(MARKER_PATTERN, text, re.IGNORECASE)
+    marker = re.match(MARKER_PATTERN, text, re.IGNORECASE) or re.search(
+        r"\b(TODO|FIXME|BUG|HACK|XXX)\b", text
+    )
     if marker:
         candidates.append(MARKERS[marker.group(1).upper()])
 
