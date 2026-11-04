@@ -1,0 +1,151 @@
+id,text,label,group,file,line
+1,"https://datatracker.ietf.org/doc/html/rfc6455#section-5.3 If we are using a mask, we need to generate it randomly and apply it to the message before sending it. A mask is a 32-bit value that is applied to the message using a bitwise XOR operation. It is used to prevent certain types of attacks on the websocket protocol. The mask is only used when aiohttp is acting as a client. Servers do not use a mask.",none,risk,venv/lib/python3.13/site-packages/aiohttp/_websocket/writer.py,152
+2,"When they do inject NaNs, all backends behave the same.",none,risk,venv/lib/python3.13/site-packages/scipy/stats/tests/test_stats.py,247
+3,FIXME: 'enclose' in dummy; wrong ref 'name',none,marker,venv/lib/python3.13/site-packages/dill/source.py,922
+4,"Promote single precision to double to prevent overflows Cf. np.linalg.det(np.diag([1e+38, 1e+38]).astype(np.float32))",low,risk,venv/lib/python3.13/site-packages/scipy/linalg/_basic.py,1230
+5,"When X is a scipy sparse matrix, self.mean_ is a numpy matrix, so we need to transform it to a 1D array. Note that this is not the case when X is a scipy sparse array. TODO: remove the following two lines when scikit-learn only depends on scipy versions that no longer support scipy.sparse matrices.",low,marker,venv/lib/python3.13/site-packages/sklearn/decomposition/_pca.py,561
+6,TODO: can we do better?,low,marker,venv/lib/python3.13/site-packages/huggingface_hub/_local_folder.py,420
+7,"Regression test for gh-17375.  On Windows, a large enough input that should have been well within the capabilities of 64 bit integers would result in a 32 bit overflow because of a bug in Cython 0.29.32.",none,risk,venv/lib/python3.13/site-packages/scipy/signal/tests/test_upfirdn.py,325
+8,Split and shuffle unique groups across n_splits,low,other,venv/lib/python3.13/site-packages/sklearn/model_selection/_split.py,626
+9,TODO: Use pandas.io.common.dedup_names instead (see #50371),low,marker,venv/lib/python3.13/site-packages/pandas/io/parsers/python_parser.py,647
+10,"TODO: For skipna=False, bool(pd.NA) raises; should groupby?",low,marker,venv/lib/python3.13/site-packages/pandas/tests/groupby/test_reductions.py,993
+11,"`AttributeError` occurs when `__dlpack__` and `__dlpack_device__` methods are not present on the input array `TypeError` and `NotImplementedError` for packages that do not yet support dlpack 1.0 (i.e. the `device`/`copy` kwargs, e.g., torch <= 2.8.0) See https://github.com/data-apis/array-api/pull/741 for more details about the introduction of the `copy` and `device` kwargs in the from_dlpack method and their expected meaning by namespaces implementing the array API spec. TODO: try removing this once DLPack v1 more widely supported TODO: ValueError not needed once min NumPy >=2.4.0: https://github.com/numpy/numpy/issues/30341",low,marker,venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py,599
+12,Handle inputs (i.e. env variables injection),low,risk,venv/lib/python3.13/site-packages/huggingface_hub/inference/_mcp/cli.py,67
+13,Exact distribution of test statistic under null hypothesis expressed as frequencies/counts/integers to maintain precision. Stored as floats to avoid overflow of sums.,none,risk,venv/lib/python3.13/site-packages/scipy/stats/_morestats.py,3009
+14,Check that third-party library can run tests without inheriting from BaseEstimator. FIXME,low,marker,venv/lib/python3.13/site-packages/sklearn/utils/tests/test_estimator_checks.py,1483
+15,"TODO: taken from tests.frame.test_operators, needs cleanup",none,marker,venv/lib/python3.13/site-packages/pandas/tests/arithmetic/test_numeric.py,1013
+16,For PyPy or other GCs.,low,other,venv/lib/python3.13/site-packages/multiprocess/tests/__init__.py,756
+17,"FIXME: missing: *buffering*, encoding, softspace",low,marker,venv/lib/python3.13/site-packages/dill/_dill.py,864
+18,GH#54105 - Period can be confusingly instantiated with lowercase freq TODO: raise in the future an error when passing lowercase freq,low,marker,venv/lib/python3.13/site-packages/pandas/tests/scalar/period/test_period.py,93
+19,pre-2.0 this would coerce to object with mismatched tzs,low,other,venv/lib/python3.13/site-packages/pandas/tests/frame/methods/test_replace.py,1115
+20,"TODO: fsspec can also handle HTTP via requests, but leaving this unchanged. using fsspec appears to break the ability to infer if the server responded with gzipped data",low,marker,venv/lib/python3.13/site-packages/pandas/io/common.py,394
+21,TODO(non-nano) Workaround for common_type not dealing with different resolutions,low,marker,venv/lib/python3.13/site-packages/pandas/core/reshape/merge.py,1365
+22,TODO: moved from tests.series.test_operators; needs cleanup,none,marker,venv/lib/python3.13/site-packages/pandas/tests/arithmetic/test_datetime64.py,158
+23,"Interleave complex values and their conjugates, with negative imaginary parts first in each pair",none,other,venv/lib/python3.13/site-packages/scipy/signal/_filter_design.py,1151
+24,TODO: is the next line needed above in the data(...) method?,none,marker,venv/lib/python3.13/site-packages/pandas/io/stata.py,1954
+25,"I'm sure there's a simple formula for p_mass_at_c in this case, but I don't know it. Use generic formula for one-sided p-value.",low,other,venv/lib/python3.13/site-packages/scipy/stats/_mstats_basic.py,753
+26,Compute a Cauchy step on the tangent space of the active constraints.,none,other,venv/lib/python3.13/site-packages/scipy/_external/cobyqa/framework.py,722
+27,The code below also caused SEGFAULT,none,risk,venv/lib/python3.13/site-packages/scipy/stats/tests/test_stats.py,2031
+28,TODO: Make verbosity argument for Lasso? sklearn.linear_model.coordinate_descent.enet_path has a verbosity argument that we could pass in from Lasso.,low,marker,venv/lib/python3.13/site-packages/sklearn/decomposition/_dict_learning.py,142
+29,"Try to preserve `dtype`, but we need to ensure that the arguments are at least floats before passing them into the function; integers can overflow and cause failure. There might be benefit to combining the `xs` into a single array and calling `func` once on the combined array. For now, keep them separate.",none,risk,venv/lib/python3.13/site-packages/scipy/_lib/_elementwise_iterative_method.py,92
+30,TODO: this for-loop is slow; can be implemented in Cython/C/C++ later,low,marker,venv/lib/python3.13/site-packages/pandas/core/interchange/column.py,361
+31,TODO: assert that we have copies?,low,marker,venv/lib/python3.13/site-packages/pandas/tests/frame/test_unary.py,152
+32,Case: setting a series as a new column (df[col] = s) copies that data (with delayed copy with CoW),low,other,venv/lib/python3.13/site-packages/pandas/tests/copy_view/test_setitem.py,32
+33,"TODO: This ""sandwich product"" is the main computational bottleneck for solvers that use the full hessian matrix. Here, thread parallelism would pay-off the most. While a dedicated Cython routine could exploit the symmetry, it is very hard to beat BLAS GEMM, even thought the latter cannot exploit the symmetry, unless one pays the price of taking square roots and implements sqrtWX = sqrt(W)[: None] * X return sqrtWX.T @ sqrtWX which (might) detect the symmetry and use BLAS SYRK under the hood.",low,risk,venv/lib/python3.13/site-packages/sklearn/linear_model/_linear_loss.py,22
+34,"FIXME: should find referenced __builtins__ res = globalvars(_class, recurse=True) assert set(res) == set(['True']) res = globalvars(_class, recurse=False) assert res == {} res = globalvars(_class.ok, recurse=True) assert set(res) == set(['True']) res = globalvars(_class.ok, recurse=False) assert set(res) == set(['True'])",low,marker,venv/lib/python3.13/site-packages/dill/tests/test_detect.py,84
+35,XXX: don't worry about alias? recurse? etc?,low,marker,venv/lib/python3.13/site-packages/dill/source.py,997
+36,in _generate_regular_range we added `stride` thereby overflowing the bounds.  Adjust to fix this.,low,risk,venv/lib/python3.13/site-packages/pandas/core/arrays/_ranges.py,151
+37,"If the boundaries are not satisfied for some coordinate for which ""d"" is zero, there is no box-line intersection.",none,other,venv/lib/python3.13/site-packages/scipy/optimize/_trustregion_constr/qp_subproblem.py,198
+38,"Use dtype=np.float64 to check that this does not trigger an unintentional upcasting: the dtype of the base estimator should control the dtype of the final model. In particular, the sigmoid calibrator relies on inputs (predictions and sample weights) with consistent dtypes because it is partially written in Cython. As this test forces the predictions to be `float32`, we want to check that `CalibratedClassifierCV` internally converts `sample_weight` to the same dtype to avoid crashing the Cython call.",high,risk,venv/lib/python3.13/site-packages/sklearn/tests/test_calibration.py,1183
+39,"Should not crash, gh-7991",high,risk,venv/lib/python3.13/site-packages/scipy/signal/tests/test_signaltools.py,2335
+40,TODO check groupby with > 1 col ?,low,marker,venv/lib/python3.13/site-packages/pandas/tests/groupby/test_groupby.py,2800
+41,I suppose we could allow setting of non-fill_value elements. TODO(SparseArray.__setitem__): remove special cases in ExtensionBlock.where,low,marker,venv/lib/python3.13/site-packages/pandas/core/arrays/sparse/array.py,609
+42,Test pandas IntegerArray with pd.NA,low,other,venv/lib/python3.13/site-packages/sklearn/preprocessing/tests/test_common.py,170
+43,Hack to be able to raise if `.validate()` already exists except if it was created by this decorator on a parent class (in which case we just override it),low,marker,venv/lib/python3.13/site-packages/huggingface_hub/dataclasses.py,255
+44,Issue #36430 Integer overflow for Period over the maximum timestamp,medium,risk,venv/lib/python3.13/site-packages/pandas/tests/scalar/period/test_period.py,642
+45,"ops.BaseGrouper TODO: 2023-02-03 no test cases with len(newgrouper.groupings) > 1. If that were to occur, would we be throwing out information? error: Cannot determine type of ""grouping_vector""  [has-type]",low,marker,venv/lib/python3.13/site-packages/pandas/core/groupby/grouper.py,511
+46,"Under POSIX (e.g. Linux or OSX), using multiprocessing in conjunction with some implementation of BLAS (or other libraries that manage an internal posix thread pool) can cause a crash or a freeze of the Python process.",high,risk,venv/lib/python3.13/site-packages/sklearn/utils/_testing.py,338
+47,XXX: we have to set atol for this test to pass for all seeds when fitting with float32 data. Is this revealing a bug?,low,marker,venv/lib/python3.13/site-packages/sklearn/decomposition/tests/test_fastica.py,308
+48,b.decision_function(X_sp)  # XXX : should be supported,low,marker,venv/lib/python3.13/site-packages/sklearn/svm/tests/test_sparse.py,483
+49,"Disabled due to segfaults on win32, see ticket 1717.",medium,risk,venv/lib/python3.13/site-packages/scipy/linalg/_decomp_qz.py,74
+50,TODO: allow length to be None and read to the end of the file?,low,marker,venv/lib/python3.13/site-packages/fsspec/utils.py,293
+51,TODO: perhaps allow for special properties -excel-pattern-bgcolor and -excel-pattern-type,low,marker,venv/lib/python3.13/site-packages/pandas/io/formats/excel.py,364
+52,Cov_n = Cov_j + x_j * X + increment(betas) TODO: will this still work with multiple drops ?,low,marker,venv/lib/python3.13/site-packages/sklearn/linear_model/_least_angle.py,885
+53,TODO: Remove this in 3.0.0: see #2811,low,marker,venv/lib/python3.13/site-packages/requests/adapters.py,715
+54,positive overflow in float32,medium,risk,venv/lib/python3.13/site-packages/scipy/stats/tests/test_morestats.py,2945
+55,check that poll() doesn't crash,high,risk,venv/lib/python3.13/site-packages/multiprocess/tests/__init__.py,5053
+56,a list of integers,none,other,venv/lib/python3.13/site-packages/pandas/core/indexing.py,1762
+57,"Split around "";"" > Strip whitespaces > Store as dict keys (ensure unicity) > format back as string Order is implicitly preserved by dictionary structure (see https://stackoverflow.com/a/53657523).",none,risk,venv/lib/python3.13/site-packages/huggingface_hub/utils/_headers.py,206
+58,Next test is to make sure calculation uses sufficient precision. The denominator's value is ~n^3 and used to be represented as an int. 2000**3 > 2**32 so these arrays would cause overflow on some machines.,none,risk,venv/lib/python3.13/site-packages/scipy/stats/tests/test_mstats_basic.py,240
+59,"error: Incompatible types in assignment (expression has type ""str"", variable has type ""Literal['dict', 'list', 'series', 'split', 'tight', 'records', 'index']"")",low,other,venv/lib/python3.13/site-packages/pandas/core/methods/to_dict.py,158
+60,x['CursesWindowType'] = _curwin = curses.initscr() #FIXME: messes up tty x['CursesTextPadType'] = textpad.Textbox(_curwin) x['CursesPanelType'] = panel.new_panel(_curwin),low,marker,venv/lib/python3.13/site-packages/dill/_objects.py,474
+61,"Obtained by checking `decoders` in `webdataset.autodecode` and removing unsafe extension decoders. Removed Pickle decoders: - ""pyd"": lambda data: pickle.loads(data) - ""pickle"": lambda data: pickle.loads(data) Modified NumPy decoders to fix CVE-2019-6446 (add allow_pickle=False and weights_only=True): - ""npy"": npy_loads, - ""npz"": lambda data: np.load(io.BytesIO(data)), - ""pth"": lambda data: torch_loads(data)",none,risk,venv/lib/python3.13/site-packages/datasets/packaged_modules/webdataset/webdataset.py,335
+62,"todo: figure out warning situation address https://github.com/scipy/scipy/pull/18650#discussion_r1233032521 without `minweight`, we are also suppressing infinities within the interval. Is that OK? If so, we can probably get rid of `status=3`. support singularities? interval subdivision? this feature will be added eventually, but do we adjust the interface now?",low,marker,venv/lib/python3.13/site-packages/scipy/integrate/_tanhsinh.py,14
+63,"TODO: should prob allow a str of Interval work as well IOW '(0, 5]'",low,marker,venv/lib/python3.13/site-packages/pandas/tests/groupby/test_grouping.py,952
+64,"2022-01-09 I (brock) am not sure if it is possible for this to overflow and cast to e.g. f8, but if it does we need to cast",none,risk,venv/lib/python3.13/site-packages/pandas/core/arrays/datetimes.py,519
+65,GH#24252 check that we get OutOfBoundsDatetime and not OverflowError,none,risk,venv/lib/python3.13/site-packages/pandas/tests/indexes/datetimes/test_date_range.py,1118
+66,an overflow in exp was producing a RuntimeWarning create own object here in case someone changes self.T,none,risk,venv/lib/python3.13/site-packages/scipy/optimize/tests/test__basinhopping.py,436
+67,"TODO: test cases where this doesn't hold, i.e. 2D DTA/TDA",low,marker,venv/lib/python3.13/site-packages/pandas/core/arraylike.py,518
+68,fracmult[nact:mcon] may contain garbage,none,other,venv/lib/python3.13/site-packages/scipy/_external/pyprima/cobyla/trustregion.py,255
+69,"These really are 32-bit integers in FORTRAN (gfortran), even on 64-bit platforms. XXX: some other FORTRAN compilers may not agree.",low,marker,venv/lib/python3.13/site-packages/scipy/odr/_odrpack.py,809
+70,"We want to map to the most specific exception we can find. Eg if `exc` is an `httpcore.ReadTimeout`, we want to map to `httpx.ReadTimeout`, not just `httpx.TimeoutException`.",none,other,venv/lib/python3.13/site-packages/httpx/_transports/default.py,108
+71,TODO: also changes DataFrame.__setitem__ with expansion,low,marker,venv/lib/python3.13/site-packages/pandas/tests/indexes/datetimes/methods/test_insert.py,192
+72,make sure layout is handled,none,other,venv/lib/python3.13/site-packages/pandas/tests/plotting/test_hist_method.py,261
+73,A band too narrow for the dense grid used to segfault (gh-24495).,high,risk,venv/lib/python3.13/site-packages/scipy/signal/tests/test_fir_filter_design.py,574
+74,gh8320 check that decreasing the size of the returned array raises an error and doesn't segfault,high,risk,venv/lib/python3.13/site-packages/scipy/optimize/tests/test__root.py,66
+75,make a check value list from the registry entry: replace the '<local>' string by the localhost entry and the corresponding canonical entry.,none,other,venv/lib/python3.13/site-packages/requests/utils.py,119
+76,TODO: more freq variants,low,marker,venv/lib/python3.13/site-packages/pandas/tests/arrays/test_datetimelike.py,34
+77,Compute a mapping from indices to distances for each result set and check that the computed neighbors with matching indices are within the expected distance tolerance.,none,other,venv/lib/python3.13/site-packages/sklearn/metrics/tests/test_pairwise_distances_reduction.py,82
+78,Check that no segfaults appear with concurrent access to Akima1D,high,risk,venv/lib/python3.13/site-packages/scipy/interpolate/tests/test_interpolate.py,1050
+79,"This test doesn't check that the output is correct, just that it doesn't crash",high,risk,venv/lib/python3.13/site-packages/scipy/optimize/_trustregion_constr/tests/test_nested_minimize.py,39
+80,fmt: off There are a number of cases which fail on some but not all platforms. These are excluded by the filters below. TODO: Rewrite tests so that the now filtered out test cases are still run but marked in pytest as expected to fail.,low,marker,venv/lib/python3.13/site-packages/scipy/stats/tests/test_distributions.py,5890
+81,"gzip magic number, see https://stackoverflow.com/a/76055284/9534390 or ""Magic number"" on https://en.wikipedia.org/wiki/Gzip",medium,risk,venv/lib/python3.13/site-packages/datasets/features/nifti.py,206
+82,Scalar values shouldn't cause the parsing to crash or fail.,high,risk,venv/lib/python3.13/site-packages/pandas/tests/io/parser/test_na_values.py,377
+83,For datetime64tz we need to drop the TZ in tests TODO: why?,low,marker,venv/lib/python3.13/site-packages/pandas/io/pytables.py,5466
+84,"TODO: ser.where(~mask, alt) unnecessarily upcasts to int64",low,marker,venv/lib/python3.13/site-packages/pandas/tests/series/indexing/test_setitem.py,412
+85,"During review of gh-22037, it was noted that the `support` of an `OrderStatisticDistribution` returned incorrect results; this was resolved by overriding `_support`.",none,other,venv/lib/python3.13/site-packages/scipy/stats/tests/test_continuous.py,1997
+86,Getting the associated distances,none,other,venv/lib/python3.13/site-packages/sklearn/metrics/tests/test_pairwise_distances_reduction.py,1405
+87,TODO write an array-agnostic pad,low,marker,venv/lib/python3.13/site-packages/scipy/fft/tests/test_real_transforms.py,110
+88,todo: use `xp` as backend when `ansari` is translated to array API,medium,marker,venv/lib/python3.13/site-packages/scipy/stats/tests/test_resampling.py,1583
+89,TODO(devtools): use _tested_estimators instead of all_estimators in the decorator,low,marker,venv/lib/python3.13/site-packages/sklearn/tests/test_docstring_parameters.py,218
+90,XXX: we might want to do some of the following in logspace instead for numerical stability. Converting X to float allows getting better performance for the safe_sparse_dot call made below.,low,marker,venv/lib/python3.13/site-packages/sklearn/feature_selection/_univariate_selection.py,261
+91,TODO: np.clip has other ufunc kwargs,low,marker,venv/lib/python3.13/site-packages/scipy/_external/array_api_compat/common/_aliases.py,382
+92,TODO this can return other backends e.g. tpu but they're unsupported in scipy,low,marker,venv/lib/python3.13/site-packages/scipy/_lib/_array_api.py,1181
+93,Special case all-positive/negative data to avoid overflow and precision loss,medium,risk,venv/lib/python3.13/site-packages/scipy/stats/_morestats.py,1890
+94,used to overflow before non-ns support,medium,risk,venv/lib/python3.13/site-packages/pandas/tests/scalar/timedelta/test_constructors.py,515
+95,histogram kernel produces singular matrix inside linalg.solve XXX use a least-squares approximation?,medium,marker,venv/lib/python3.13/site-packages/sklearn/decomposition/tests/test_kernel_pca.py,42
+96,Check shape and contents,none,other,venv/lib/python3.13/site-packages/sklearn/utils/tests/test_extmath.py,623
+97,"svd(array, k) should not segfault",high,risk,venv/lib/python3.13/site-packages/scipy/linalg/tests/test_interpolative.py,179
+98,FIXME: 2020-05-07 freq check randomly fails in the CI,low,marker,venv/lib/python3.13/site-packages/pandas/tests/io/pytables/test_append.py,590
+99,"previously, RVS were converted to `np.int32` on some platforms, causing overflow for moderately large integer output (gh-9313). Check that this is resolved to the extent possible w/ `np.int64`.",medium,risk,venv/lib/python3.13/site-packages/scipy/stats/tests/test_distributions.py,1301
+100,"If these share data, then setitem could corrupt our IA",medium,risk,venv/lib/python3.13/site-packages/pandas/core/arrays/interval.py,421
+101,handle int64 overflow if possible no overflow with 4 overflow possible with 8,medium,risk,venv/lib/python3.13/site-packages/pandas/tests/indexes/multi/test_duplicates.py,206
+102,"FIXME: don't leave commented-out 113 is buggy due to limits of date format support in Stata parsed_113 = self.read_dta( datapath(""io"", ""data"", ""stata"", ""stata2_113.dta"") )",low,marker,venv/lib/python3.13/site-packages/pandas/tests/io/test_stata.py,214
+103,"Finally, check that the worker pids have changed",none,other,venv/lib/python3.13/site-packages/multiprocess/tests/__init__.py,3104
+104,suppress Period[B] deprecation warning TODO: need to find an alternative to this before the deprecation is enforced!,low,marker,venv/lib/python3.13/site-packages/pandas/plotting/_matplotlib/timeseries.py,281
+105,"Ensure input is of float type, to avoid integer overflows etc.",medium,risk,venv/lib/python3.13/site-packages/scipy/sparse/linalg/_matfuncs.py,622
+106,Note: extrapolation is a polynomial of degree = order - 1.,none,other,venv/lib/python3.13/site-packages/scipy/signal/tests/test_whittaker.py,342
+107,TODO: avoid having to construct values[indexer],low,marker,venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py,1122
+108,FIXME: there are more elaborate methods than generating the codebook randomly.,low,marker,venv/lib/python3.13/site-packages/sklearn/multiclass.py,1209
+109,"check that we raise, not segfault",high,risk,venv/lib/python3.13/site-packages/pandas/tests/tslibs/test_np_datetime.py,145
+110,"'dt3' : date_range('20130101 00:00:01',periods=3,freq='s'), FIXME: don't leave commented-out",low,marker,venv/lib/python3.13/site-packages/pandas/tests/frame/test_block_internals.py,202
+111,Test that for large values of window_length and polyorder the array of coefficients returned is symmetric. The aim is to ensure that no potential numeric overflow occurs.,medium,risk,venv/lib/python3.13/site-packages/scipy/signal/tests/test_savitzky_golay.py,180
+112,Ensure proper error if string given as weight for Series or DataFrame with axis = 1.,medium,other,venv/lib/python3.13/site-packages/pandas/tests/frame/methods/test_sample.py,254
+113,"GH#24539 recognize e.g xarray, dask, ... Note: we dont do this for PeriodArray bc _from_sequence won't accept an array of integers TODO: could check with arraylike of Period objects GH#24539 recognize e.g xarray, dask, ...",low,marker,venv/lib/python3.13/site-packages/pandas/tests/test_downstream.py,257
+114,see gh-13717: no segfaults!,high,risk,venv/lib/python3.13/site-packages/pandas/tests/dtypes/test_missing.py,749
+115,"FIXME, this method's type doesn't say returning None is possible",low,marker,venv/lib/python3.13/site-packages/urllib3/response.py,1217
+116,Very large values in an input.  A naive implementation will suffer from overflow. See https://github.com/scipy/scipy/issues/8980,medium,risk,venv/lib/python3.13/site-packages/scipy/stats/tests/test_stats.py,459
+117,TODO: derive fs from `root`,low,marker,venv/lib/python3.13/site-packages/fsspec/implementations/reference.py,151
+118,check a large jump does not cause a float overflow,medium,risk,venv/lib/python3.13/site-packages/scipy/interpolate/tests/test_interpolate.py,1025
+119,TODO(EA2D): special casing not needed with 2D EAs,low,marker,venv/lib/python3.13/site-packages/pandas/core/internals/managers.py,1269
+120,"Before bpo-36867 was fixed, a SharedMemoryManager not using the same resource_tracker process as its parent would make the parent's tracker complain about sl being leaked even though smm.shutdown() properly released sl.",low,risk,venv/lib/python3.13/site-packages/multiprocess/tests/__init__.py,4461
+121,preserve frequency when the difference is a contiguous subset of the original range,medium,other,venv/lib/python3.13/site-packages/pandas/tests/indexes/datetimes/test_setops.py,432
+122,XXX doesn't work with y_class because RF doesn't support classes_ Shouldn't AdaBoost run a LabelBinarizer?,medium,marker,venv/lib/python3.13/site-packages/sklearn/ensemble/tests/test_weight_boosting.py,239
+123,"Estimators with `1darray` in `X_types` tag only accept X of shape (`n_samples`,)",medium,other,venv/lib/python3.13/site-packages/sklearn/utils/estimator_checks.py,4227
+124,Check for integer overflows,medium,risk,venv/lib/python3.13/site-packages/scipy/sparse/linalg/tests/test_matfuncs.py,186
+125,rv_sample should override _expect. Bug report from https://stackoverflow.com/questions/63199792,medium,risk,venv/lib/python3.13/site-packages/scipy/stats/tests/test_distributions.py,4210
+126,see gh-22579 Column misalignment also occurs for a standard index when the columns index is named. Initially fill row with blank cells before column names. TODO: Refactor to remove code duplication with code block above for columns MultiIndex.,low,marker,venv/lib/python3.13/site-packages/pandas/io/formats/html.py,374
+127,TODO: make these more consistent?,low,marker,venv/lib/python3.13/site-packages/pandas/tests/indexes/test_indexing.py,208
+128,TODO: Consider whether pa1 and pa2 could also work for other losses.,low,marker,venv/lib/python3.13/site-packages/sklearn/linear_model/_stochastic_gradient.py,159
+129,Check that the dataset doesn't overwrite itself. It can cause a permission error on Windows and a segfault on linux.,high,risk,venv/lib/python3.13/site-packages/datasets/arrow_dataset.py,1857
+130,count memleaks while constructing and querying cKDTree,high,risk,venv/lib/python3.13/site-packages/scipy/spatial/tests/test_kdtree.py,1147
+131,TODO: remove once Lance supports HF links with revisions,low,marker,venv/lib/python3.13/site-packages/datasets/packaged_modules/lance/lance.py,115
+132,TODO: test(s) that get here TODO: try to de-duplicate this convert function with core.construction functions,low,marker,venv/lib/python3.13/site-packages/pandas/core/internals/construction.py,1038
+133,don't coerce 0-len data,medium,other,venv/lib/python3.13/site-packages/pandas/io/json/_json.py,1291
+134,Test we can detect truncated or corrupt (all zero) files.,high,risk,venv/lib/python3.13/site-packages/scipy/io/matlab/tests/test_mio.py,1468
+135,`expected` is constructed from obj.values.dot(other.values),medium,other,venv/lib/python3.13/site-packages/pandas/tests/frame/methods/test_dot.py,38
+136,gradient with respect to alpha,none,other,venv/lib/python3.13/site-packages/sklearn/gaussian_process/kernels.py,1937
+137,"Exclude index types where the conversion to numpy converts to object dtype, which negates the performance benefit of libjoin Subclasses should override to return False if _get_join_target is not zero-copy. TODO: exclude RangeIndex (which allocates memory)? Doing so seems to break test_concat_datetime_timezone",low,marker,venv/lib/python3.13/site-packages/pandas/core/indexes/base.py,4964
+138,The MIN avoids overflow.,medium,risk,venv/lib/python3.13/site-packages/scipy/_external/pyprima/common/selectx.py,50
+139,TODO(kszucs): we may want to persist multiple parameters,low,marker,venv/lib/python3.13/site-packages/datasets/io/parquet.py,154
+140,TODO: we dont have tests that get here,low,marker,venv/lib/python3.13/site-packages/pandas/core/indexes/base.py,6446
+141,re-embed a noisy version of X using the transform method,none,other,venv/lib/python3.13/site-packages/sklearn/manifold/tests/test_locally_linear.py,78
+142,regression test for https://github.com/scipy/scipy/issues/17436 the problem was an int overflow in zeroing out the unused triangular part,high,risk,venv/lib/python3.13/site-packages/scipy/linalg/tests/test_decomp_cholesky.py,69
+143,TODO(1.10): remove after deprecation cycle.,low,marker,venv/lib/python3.13/site-packages/sklearn/linear_model/tests/test_logistic.py,2678
+144,Generate gradient vector accordingly to the case is being tested.,low,other,venv/lib/python3.13/site-packages/scipy/optimize/tests/test_trustregion_exact.py,33
+145,"TODO(GH#41493): we cannot just do type(self._data)(res_i8.values, dtype=self.dtype, freq=new_freq) because test_setops_preserve_freq fails with _validate_frequency raising. This raising is incorrect, as 'on_freq' is incorrect. This will be fixed by GH#41493",low,marker,venv/lib/python3.13/site-packages/pandas/core/indexes/datetimelike.py,739
+146,Old versions of Queue would fail to create a new feeder thread for a forked process if the original process had its own feeder thread.  This test checks that this no longer happens.,high,other,venv/lib/python3.13/site-packages/multiprocess/tests/__init__.py,1190
+147,see gh-9735: this issue is C parser-specific (bug when parsing whitespace and characters at chunk boundary),low,marker,venv/lib/python3.13/site-packages/pandas/tests/io/parser/test_c_parser_only.py,538
+148,"TODO: if iteration == 1: We might stop early, e.g. we already are close to the optimum, usually detected by zero gradients at this stage.",low,marker,venv/lib/python3.13/site-packages/sklearn/linear_model/_glm/_newton_solver.py,405
+149,RuntimeWarning: overflow encountered in matmul ConvergenceWarning: Stochastic Optimizer: Maximum iteration,medium,risk,venv/lib/python3.13/site-packages/sklearn/neural_network/tests/test_mlp.py,1039
+150,todo: use `xp` as backend when `wilcoxon` is translated to array API 'less' ensures we get the same of two statistics every time,low,marker,venv/lib/python3.13/site-packages/scipy/stats/tests/test_resampling.py,1687

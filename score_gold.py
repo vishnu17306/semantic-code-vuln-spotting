@@ -51,7 +51,9 @@ present = [lab for lab in LEVELS if lab in y_true]
 
 print(f"PART 2: severity on the {len(idx)} real issues")
 print("  true label counts:", {lab: y_true.count(lab) for lab in present})
-print(f"  always-'medium' accuracy for reference: {y_true.count('medium') / len(y_true):.1%}\n")
+majority = max(set(y_true), key=y_true.count)
+maj_pred = [majority] * len(y_true)
+print(f"  always-'{majority}' baseline: accuracy {accuracy_score(y_true, maj_pred):.1%}, macro-F1 {f1_score(y_true, maj_pred, labels=present, average='macro', zero_division=0):.3f}\n")
 
 for name, pred in [("Keyword rules", y_kw), ("TF-IDF model", y_model)]:
     macro = f1_score(y_true, pred, labels=present, average="macro", zero_division=0)
