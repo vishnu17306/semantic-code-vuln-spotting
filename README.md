@@ -70,7 +70,7 @@ For the question "is this comment an issue at all?", the keyword rules reach pre
 - The gold set has no critical examples and only 17 high ones, so the tool's performance on urgent comments is not measured.
 - Commit messages mostly describe work that is already done, so those findings are hints.
 - Python only. Pull request descriptions are not read.
-- The path traversal detector does not recognize sanitization, so a validated path is still flagged.
+- The path traversal detector does not recognize sanitization (a validated path is still flagged), does not follow values returned by function calls, and does not cover `async def` handlers.
 
 ## Data
 

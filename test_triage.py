@@ -38,3 +38,11 @@ def test_unparseable_file_is_counted_not_fatal(tmp_path):
     issues, files, skipped = scan_files(tmp_path, DEFAULT_EXCLUDES)
     assert files == 1
     assert skipped == 1
+
+
+def test_findings_three_lines_apart_are_not_linked():
+    comment = make_issue("comment", "low", "incomplete", "TODO: later", "do it", file="a.py", line=14)
+    scanner = make_issue("scanner", "high", "Path Traversal", "code", "fix", file="a.py", line=11)
+    link_findings([comment, scanner])
+    assert comment["also_flagged_by"] == []
+    assert scanner["also_flagged_by"] == []

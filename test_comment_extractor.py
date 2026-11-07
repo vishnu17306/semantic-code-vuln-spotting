@@ -1,52 +1,30 @@
-import subprocess
-
-from commit_extractor import extract_commit_messages
+from comment_extractor import extract_inline_comments
 
 
-def make_repo(tmp_path, messages):
-    def git(*args):
-        subprocess.run(
-            ["git", "-C", str(tmp_path),
-             "-c", "user.name=tester", "-c", "user.email=t@example.com", *args],
-            check=True, capture_output=True,
-        )
-
-    git("init")
-    for i, msg in enumerate(messages):
-        (tmp_path / f"f{i}.txt").write_text(str(i))
-        git("add", ".")
-        git("commit", "-m", msg)
-
-
-def test_commit_messages_extracted(tmp_path):
-    make_repo(tmp_path, ["first commit", "Fix crash on empty input"])
-    records = extract_commit_messages(str(tmp_path))
-    assert len(records) == 2
-    assert records[0]["text"] == "Fix crash on empty input"  # newest first
-    assert records[0]["source_type"] == "commit_message"
-
-
-def test_record_has_unified_shape(tmp_path):
-    make_repo(tmp_path, ["only commit"])
-    record = extract_commit_messages(str(tmp_path))[0]
-    assert set(record) == {"text", "source_type", "location", "raw_context"}
-
-
-def test_not_a_git_repo_returns_empty(tmp_path):
-    assert extract_commit_messages(str(tmp_path)) == []
-
-def test_consecutive_comment_lines_are_merged():
-    src = "# first part of the note\n# second part of the note\nx = 1"
-    results = extract_inline_comments(src)
+def test_standalone_comment_extracted():
+    results = extract_inline_comments("# TODO: fix this\nx = 1")
     assert len(results) == 1
-    assert results[0]["text"] == "first part of the note second part of the note"
+    assert results[0]["text"] == "TODO: fix this"
     assert results[0]["location"] == 1
 
 
-def test_trailing_comments_are_not_merged():
-    src = "x = 1  # one\ny = 2  # two"
-    assert len(extract_inline_comments(src)) == 2
+def test_trailing_comment_extracted():
+    results = extract_inline_comments("x = 1  # FIXME: wrong value")
+    assert len(results) == 1
+    assert results[0]["raw_context"] == "x = 1  # FIXME: wrong value"
 
+
+def test_hash_inside_string_is_not_a_comment():
+    results = extract_inline_comments('url = "http://x.com/#anchor"')
+    assert results == []
+
+
+def test_empty_file_returns_nothing():
+    assert extract_inline_comments("") == []
+
+
+def test_broken_file_does_not_crash():
+    extract_inline_comments("def broken(:\n    # still a comment\n")
 
 
 def test_consecutive_comment_lines_are_merged():
