@@ -32,7 +32,7 @@ SCANNER_RECOMMENDATIONS = {
     "Path Traversal": "Resolve the path and check that it stays inside the allowed folder before opening it.",
 }
 
-LINK_WINDOW = 3  # a comment and a scanner finding this close are linked
+LINK_WINDOW = 2  # a comment and a scanner finding this close are linked
 MAX_FILE_BYTES = 500_000
 
 
